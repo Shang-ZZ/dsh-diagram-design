@@ -1,4 +1,0 @@
-- insert:
-    - id: diagram-design
-      name: '@local/diagram-design'
-      config: {}

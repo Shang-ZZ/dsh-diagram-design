@@ -1,6 +1,0 @@
-{
-  "meta": {
-    "title": "图表设计 Diagram Design",
-    "description": "用编辑级设计系统绘制 45 种图表（单文件 HTML+SVG），支持 draw.io / Mermaid / Excalidraw 导入、SVG / PNG 导出与画廊浏览。"
-  }
-}
