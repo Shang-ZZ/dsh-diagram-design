@@ -1,4 +1,4 @@
 - insert:
     - id: diagram-design
-      name: '@local/diagram-design'
+      name: 'dsh-diagram-design'
       config: {}

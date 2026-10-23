@@ -1,14 +1,16 @@
 import { execFile } from 'node:child_process';
-import { homedir } from 'node:os';
-import { join } from 'node:path';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { existsSync, readFileSync } from 'node:fs';
 import { promisify } from 'node:util';
 
 const execFileP = promisify(execFile);
 
-const SKILL_DIR = join(homedir(), '.agents', 'skills', 'diagram-design');
-const SCRIPTS = join(SKILL_DIR, 'scripts');
-const ASSETS = join(SKILL_DIR, 'assets');
+// Self-contained: the bundle ships its own Python scripts and example files,
+// resolved relative to this module so a GitHub or npm install works anywhere.
+const BUNDLE_DIR = dirname(fileURLToPath(import.meta.url));
+const SCRIPTS = join(BUNDLE_DIR, 'scripts');
+const EXAMPLES = join(BUNDLE_DIR, 'examples');
 
 // 45 diagram types, derived from the skill's SKILL.md selection table.
 const MANIFEST = [
@@ -103,7 +105,7 @@ function simpleOutput() {
 export const inject = ['tools', 'webServer', 'connection'];
 
 export function apply(ctx) {
-  const skillInstalled = existsSync(join(SKILL_DIR, 'SKILL.md'));
+  const scriptsInstalled = existsSync(join(SCRIPTS, 'export_svg.py'));
 
   // ---- diagram_export: HTML -> SVG / PNG ----
   ctx.effect(() => ctx.tools.register({
@@ -238,7 +240,7 @@ export function apply(ctx) {
   // ---- diagram_doctor: environment diagnostics ----
   ctx.effect(() => ctx.tools.register({
     name: 'diagram_doctor',
-    description: 'Diagnose the diagram-design environment: skill install, python3, Playwright availability, and the number of available diagram types.',
+    description: 'Diagnose the diagram-design environment: bundled scripts, python3, Playwright availability, and the number of available diagram types.',
     parameters: { type: 'object', properties: {} },
     output: {
       schema: resultSchema(),
@@ -246,7 +248,7 @@ export function apply(ctx) {
         const d = value.diagnostics ?? {};
         const lines = [
           'Diagram Design environment:',
-          `  skill installed: ${d.skillInstalled ? 'yes (' + d.skillDir + ')' : 'no'}`,
+          `  bundled scripts: ${d.scriptsInstalled ? 'yes' : 'no'}`,
           `  python3: ${d.python3 ?? 'unknown'}`,
           `  playwright (PNG export): ${d.playwright ? 'available' : 'not installed'}`,
           `  diagram types: ${d.typeCount ?? '?'}`,
@@ -257,7 +259,7 @@ export function apply(ctx) {
     },
     isConcurrencySafe: () => true,
     async execute() {
-      const diagnostics = { skillInstalled, skillDir: SKILL_DIR, typeCount: 0 };
+      const diagnostics = { scriptsInstalled, typeCount: MANIFEST.length };
       try {
         const { stdout } = await execFileP('python3', ['--version']);
         diagnostics.python3 = stdout.trim();
@@ -271,12 +273,7 @@ export function apply(ctx) {
         diagnostics.playwright = false;
         diagnostics.playwrightHint = 'pip install playwright && playwright install chromium';
       }
-      try {
-        diagnostics.typeCount = readdirSync(join(SKILL_DIR, 'references')).filter((f) => /^type-.*\.md$/.test(f)).length;
-      } catch {
-        diagnostics.typeCount = 0;
-      }
-      const ok = diagnostics.skillInstalled && diagnostics.python3 !== 'not found';
+      const ok = diagnostics.scriptsInstalled && diagnostics.python3 !== 'not found';
       return { ok, message: ok ? 'Environment ready.' : 'Environment incomplete.', diagnostics };
     },
   }));
@@ -311,7 +308,7 @@ export function apply(ctx) {
             res.end('unknown type');
             return;
           }
-          const file = join(ASSETS, `example-${slug}.html`);
+          const file = join(EXAMPLES, `example-${slug}.html`);
           if (!existsSync(file)) {
             res.statusCode = 404;
             res.end('missing example');

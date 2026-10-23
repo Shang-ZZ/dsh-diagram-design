@@ -1,5 +1,5 @@
 window.__ModuleLoader__.load({
-  id: '@local/diagram-design',
+  id: 'dsh-diagram-design',
   factory(require) {
     const React = require('react');
     const { useState, useEffect, useMemo } = React;

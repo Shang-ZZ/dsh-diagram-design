@@ -1,0 +1,39 @@
+{
+  "name": "dsh-diagram-design",
+  "version": "1.0.0",
+  "description": "Diagram Design tools and gallery for DeepSeek Harness: export HTML diagrams to SVG/PNG, import draw.io/Mermaid/Excalidraw, validate output, and browse 45 diagram types.",
+  "license": "MIT",
+  "author": "Shang-ZZ",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Shang-ZZ/dsh-diagram-design"
+  },
+  "keywords": ["dsh", "deepseek-harness", "diagrams", "svg", "png", "export", "import", "gallery"],
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "scripts/*.py",
+    "examples/*.html",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "README.md"
+  ],
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": ["@deepseek-ai/dsh-client-ui-layout", "@deepseek-ai/dsh-client-ui-sidebar"]
+    }
+  }
+}
